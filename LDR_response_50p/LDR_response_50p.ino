@@ -64,7 +64,7 @@ void loop() {
       LUX=(pow(10,-b/a))*(pow(sensr,1/a));
 
       // print out the value to the serial monitor
-      //Serial.print("V Value: ");
+      Serial.print("LUX Value: ");
       Serial.print(LUX);
       Serial.print(" \t");
       Serial.println(i*15+30);
