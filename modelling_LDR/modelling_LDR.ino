@@ -4,8 +4,10 @@ int i;
 int flag=0;
 float Ra=12650;
 float LUX;
-float a = -0.7;
-float b = 4.802;
+//float a = -0.7;
+//float b = 4.802;
+float a = -1.04;
+float b = 5.96;
 float p=pow(10,-b/a);
 
 void setup() {
