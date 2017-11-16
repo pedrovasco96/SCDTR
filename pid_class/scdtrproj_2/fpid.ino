@@ -34,7 +34,7 @@ float PID::control_signal(float ref, float LUX)
     uff = k0*ref;
     ref_change = 0;
   }
-/*  else{
+  else{
     // proporcional control
      p=K1*ref-Kp*LUX;
      
@@ -48,7 +48,7 @@ float PID::control_signal(float ref, float LUX)
       i=constrain(i, -165, 105);
     else
       i=constrain(i, -85, 185);
-  } */
+  } 
 
 
   u=p+i+uff;

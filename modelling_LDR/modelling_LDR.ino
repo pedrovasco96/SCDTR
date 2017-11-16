@@ -10,7 +10,7 @@ float p=pow(10,-b/a);
 
 void setup() {
   // initialize serial communications at 9600 bps:
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   pinMode(ledPin, OUTPUT);
 }
