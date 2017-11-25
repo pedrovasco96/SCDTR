@@ -23,7 +23,7 @@ void setup() {
 }
 
 void loop() {
-  if(Serial.available() > 0 ) {
+  while(Serial.available() > 0 ) {
     c = Serial.read();
     if(addr == 0){
       Wire.beginTransmission(1); 
@@ -45,9 +45,9 @@ void loop() {
 
 void receiveEvent(int howMany){
   while(Wire.available() > 0)  {
-  c = Wire.read(); 
-  Serial.print("Received data :");
-  Serial.write(c); 
+    c = Wire.read(); 
+    Serial.print("Received data :");
+    Serial.write(c); 
   }
 }
 
