@@ -14,7 +14,7 @@ void setup() {
   Wire.begin(addr);
   Wire.onReceive(receiveEvent);
 
-  Serial.print("address :");
+  Serial.print("address: ");
   Serial.print(addr);
   Serial.println();
   
@@ -27,15 +27,15 @@ void loop() {
     c = Serial.read();
     if(addr == 0){
       Wire.beginTransmission(1); 
-      Serial.print("Sending data: ");
+      Serial.print("Sending data ");
       Serial.write(c);
-      Serial.println("\t to: 1");
+      Serial.println(" to 1");
     } 
     else if(addr == 1){
       Wire.beginTransmission(0);
-      Serial.print("Sending data: ");
+      Serial.print("Sending data ");
       Serial.write(c);
-      Serial.println("\t to: 0");
+      Serial.println(" to 0");
     }
        
     Wire.write(c);  
@@ -46,8 +46,9 @@ void loop() {
 void receiveEvent(int howMany){
   while(Wire.available() > 0)  {
     c = Wire.read(); 
-    Serial.print("Received data :");
-    Serial.write(c); 
+    Serial.print("Received data: ");
+    Serial.write(c);
+    Serial.println(); 
   }
 }
 
