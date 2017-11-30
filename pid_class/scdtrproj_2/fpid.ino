@@ -42,12 +42,7 @@ float PID::control_signal(float ref, float LUX)
     i=i_ant+K2*(e+e_ant);
   
     //Anti-WindUp
-    if(uff == 0)
-      i=constrain(i, -5, 260);
-    else if(uff > 120)
-      i=constrain(i, -165, 105);
-    else
-      i=constrain(i, -85, 185);
+    i = constrain(i, -uff-5, uff+5);
   } 
 
 

@@ -54,7 +54,7 @@ float LUX_value()
 }
 
 void setup() {
-  // initialize serial communications at 9600 bps:
+  // initialize serial communications at 115200 bps:
   Serial.begin(115200);
 
   pinMode(A0, INPUT);
