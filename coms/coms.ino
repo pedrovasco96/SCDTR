@@ -11,7 +11,7 @@ int j= 0;
 void setup() {
   Serial.begin(115200);
 
-  addr = EEPROM.read(0);
+  addr = EEPROM.read(1);
 
   Wire.begin(addr);
   Wire.onReceive(receiveEvent);

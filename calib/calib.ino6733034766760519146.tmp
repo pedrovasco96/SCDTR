@@ -10,7 +10,7 @@ int i = 3;
 int j= 0; 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   pinMode(A0, INPUT);
   pinMode(9, OUTPUT);
@@ -30,40 +30,43 @@ void loop() {
   
   if(addr == 1){
     analogWrite(9,100);
+    Serial.println("e1");
     delay(500);
-    sensv=analogRead(A0);
-    Wire.beginTransmission(0);
+    //sensv=analogRead(A0);
+   /* Wire.beginTransmission(0);
     Wire.write(sensv);  
-    Wire.endTransmission(); 
+    Wire.endTransmission(); */
   }
 
   // addr comunicates with serial
   if(addr == 0){
     delay(500);
-    sensv=analogRead(A0);
-    //Serial.println(sensv);
+    //sensv=analogRead(A0);
+    Serial.println("e0");
     analogWrite(9,100);
   } 
 
   if(addr == 1){
     analogWrite(9,0);
+    Serial.println("e1");
     delay(500);
-    sensv=analogRead(A0);
-    Wire.beginTransmission(0);
+    //sensv=analogRead(A0);
+   /* Wire.beginTransmission(0);
     Wire.write(sensv);  
-    Wire.endTransmission();
+    Wire.endTransmission();*/
   }
 
   if(addr == 0){
     delay(500);
-    sensv=analogRead(A0);
+    Serial.println("e0");
+    //sensv=analogRead(A0);
     //Serial.println(sensv);
     analogWrite(9,0);
   } 
   delay(5000);
        
 }
-
+/*
 void receiveEvent(int howMany){
   while(Wire.available() > 0)  {
     sensv = Wire.read(); 
@@ -71,6 +74,6 @@ void receiveEvent(int howMany){
     Serial.print(sensv);
     Serial.println(); 
   }
-}
+}*/
 
 
