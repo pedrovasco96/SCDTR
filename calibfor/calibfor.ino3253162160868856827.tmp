@@ -55,10 +55,11 @@ void loop() {
           Wire.write(sensv);  
           Wire.endTransmission();
         }
-        //K[i][j]=100/sensv;
+        delay(100);
+        
+        //compute k[i][j]
       }
     }
-    delay(500);
     // desliga LED
     if(addr==adr[i])
     {
