@@ -11,7 +11,7 @@ int j= 0;
 void setup() {
   Serial.begin(115200);
 
-  addr = EEPROM.read(1);
+  addr = EEPROM.read(0);
 
   Wire.begin(addr);
   Wire.onReceive(receiveEvent);
@@ -27,17 +27,17 @@ void setup() {
 void loop() {
   if(Serial.available() > 0 ) {
     c = Serial.parseInt();
-    if(addr == 0){
-      Wire.beginTransmission(1); 
+    if(addr == 1){
+      Wire.beginTransmission(2); 
+      Serial.print("Sending data ");
+      Serial.print(c);
+      Serial.println(" to 2");
+    } 
+    else if(addr == 2){
+      Wire.beginTransmission(1);
       Serial.print("Sending data ");
       Serial.print(c);
       Serial.println(" to 1");
-    } 
-    else if(addr == 1){
-      Wire.beginTransmission(0);
-      Serial.print("Sending data ");
-      Serial.print(c);
-      Serial.println(" to 0");
     }
        
     Wire.write(c);  
@@ -46,6 +46,7 @@ void loop() {
 }
 
 void receiveEvent(int howMany){
+  delay(10000);
   while(Wire.available() > 0)  {
     c = Wire.read(); 
     Serial.print("Received data: ");

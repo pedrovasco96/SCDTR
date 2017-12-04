@@ -7,19 +7,19 @@
 byte addr;
 int c;
 int i = 0;
-int j= 0;
+int j = 0;
 int sensv;
 float start_time;
 float end_time;
 
 
 double K[N][N]={0};
-byte adr[N]={0,1};
+byte adr[N+1]={0,1,2};
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
-  addr = EEPROM.read(1);
+  addr = EEPROM.read(0);
 
   Wire.begin(addr);
   Wire.onReceive(receiveEvent);
@@ -31,27 +31,27 @@ void setup() {
 
 void loop() {
 
-  for(i=0;i<N;i++){
+  for(i=1;i<=N;i++){
     // Liga led
     if(addr==adr[i])
     {
       analogWrite(9,100);
     }
     delay(100);
-    for(j=0;j<N;j++){
+    for(j=1;j<=N;j++){
       // le valor LDR
       if(addr==adr[j])
       {
         sensv=analogRead(A0);
         // Se for endereço zero escreve no serial
-        if(addr==0)
+        if(addr==1)
         {
           Serial.println(sensv);
         }
         // Se for endereço diferente de zero envia para o zero
         else
         {
-          Wire.beginTransmission(0);
+          Wire.beginTransmission(1);
           Wire.write(sensv);  
           Wire.endTransmission();
         }
