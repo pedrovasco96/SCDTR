@@ -35,7 +35,7 @@ void setup() {
 
 void loop() {
 
-    for(i=1;j<=N;j++){
+    for(i=1;i<=N;i++){
       // le valor LDR
       if(addr==i){
         n_done = 0;
@@ -43,12 +43,19 @@ void loop() {
         Serial.println("led ligated");
         delay(500);
         K[i-1]=analogRead(A0);
-        Wire.beginTransmission(0);
-        Wire.write(d);  
-        Wire.endTransmission();
+        for(j=1;j<=N;j++){
+          if(j != i){
+            Wire.beginTransmission(j);
+            Wire.write(d);  
+            Wire.endTransmission();    
+            Serial.print("Permission granted"); 
+            Serial.println(d);   
+          }
+        }
         
         while(n_done<N){
         }
+        
         
         analogWrite(9,0);
            
@@ -62,6 +69,7 @@ void loop() {
         Wire.beginTransmission(i);
         Wire.write(c);  
         Wire.endTransmission();
+        Serial.print("Over and out");
         led_active==0;
       }
     }
@@ -81,6 +89,7 @@ void receiveEvent(int howMany){
     }
     else if(red==0){
       led_active=1;
+      Serial.println("other led is active");
     }
   }
 }
