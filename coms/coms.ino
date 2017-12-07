@@ -46,7 +46,6 @@ void loop() {
 }
 
 void receiveEvent(int howMany){
-  delay(10000);
   while(Wire.available() > 0)  {
     c = Wire.read(); 
     Serial.print("Received data: ");
