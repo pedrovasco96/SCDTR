@@ -3,6 +3,7 @@
 #include <Wire.h>
 
 #define N 2
+#define R 160
 
 byte addr;
 int c = 1;
@@ -11,13 +12,17 @@ int i = 0;
 int j = 0;
 int red = 0;
 int led_active=0;
-int n_done = 0;
-int sensv;
-float start_time;
-float end_time;
+int n_done=0;
 
 
-double K[N]={0};
+float start_time = 0;
+float curr_time = 0;
+
+float al[N] = {-0.7, -1.1};
+float bl[N] = {4.802, 6.1};
+
+float buff = 0;
+float K[N]={0};
 byte curr = 1;
 
 void setup() {
@@ -26,8 +31,11 @@ void setup() {
   addr = EEPROM.read(0);
 
   Wire.begin(addr);
+  TWAR = (addr << 1) | 1;
+  
   Wire.onReceive(receiveEvent);
 
+  
   Serial.print("address: ");
   Serial.print(addr);
   Serial.println();
@@ -39,37 +47,42 @@ void loop() {
       // le valor LDR
       if(addr==i){
         n_done = 0;
-        analogWrite(9,100);
+        analogWrite(9,R);
         Serial.println("led ligated");
-        delay(500);
-        K[i-1]=analogRead(A0);
-        for(j=1;j<=N;j++){
-          if(j != i){
-            Wire.beginTransmission(j);
-            Wire.write(d);  
-            Wire.endTransmission();    
-            Serial.print("Permission granted"); 
-            Serial.println(d);   
+        delay(1000);
+        buff = LUX_value();
+        K[i-1]=R/buff;
+        
+        Wire.beginTransmission(0);
+        Wire.write(d);  
+        Wire.endTransmission();    
+        Serial.println("Permission granted"); 
+      
+        start_time=millis();
+        while(n_done<N-1){
+          delay(50);
+          curr_time=millis();
+          if(curr_time-start_time >= 5000){
+            i--;
+            break;
           }
+            
         }
-        
-        while(n_done<N){
-        }
-        
         
         analogWrite(9,0);
            
         }
       else{
         while(led_active==0){
+          delay(50);
         }
-        Serial.print("got permission");
-        delay(500);
-        K[i-1]=analogRead(A0);
+        Serial.println("got permission");
+        delay(1000);
+        buff = LUX_value();
+        K[i-1]=R/buff;
         Wire.beginTransmission(i);
         Wire.write(c);  
         Wire.endTransmission();
-        Serial.print("Over and out");
         led_active==0;
       }
     }
@@ -83,13 +96,33 @@ void loop() {
 void receiveEvent(int howMany){
   while(Wire.available() > 0){
     red = Wire.read();
-    if(red==1){
+    if(red==c){
       n_done++;  
-      Serial.println("one finished");
+      Serial.print("one finished ");
+      Serial.println(n_done);
     }
-    else if(red==0){
+    else if(red==d){
       led_active=1;
       Serial.println("other led is active");
     }
   }
 }
+
+
+// This function computes the value in LUX in the box read by the LDR
+float LUX_value()
+{
+  // read the value from the photoresistor:
+  float sensv = analogRead(A0);
+
+  // define voltage in LDR
+  sensv=5*(sensv/1023);
+
+  // define resistance in LDR
+  float sensr=10000*(5/sensv-1);
+
+  // converting to Lux
+  return pow(10,-bl[addr-1]/al[addr-1])*(pow(sensr,1/al[addr-1]));
+}
+
+
