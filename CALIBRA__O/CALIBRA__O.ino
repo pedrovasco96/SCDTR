@@ -44,7 +44,7 @@ void setup() {
 
 void loop() {
 
-    for(i=1;i<=N;i++){
+    for(i=0;i<N;i++){
       // le valor LDR
       if(addr==i){
         n_done = 0;
@@ -52,7 +52,7 @@ void loop() {
         Serial.println("led ligated");
         delay(1000);
         buff = LUX_value();
-        K[i-1]=R_p/buff;
+        K[i]=R_p/buff;
         
         Wire.beginTransmission(0);
         Wire.write('a');  
@@ -80,7 +80,7 @@ void loop() {
         Serial.println("got permission");
         delay(1000);
         buff = LUX_value();
-        K[i-1]=R/buff;
+        K[i]=R/buff;
         Wire.beginTransmission(i);
         Wire.write('b');  
         Wire.endTransmission();
@@ -129,7 +129,7 @@ float LUX_value()
   float sensr=10000*(5/sensv-1);
 
   // converting to Lux
-  return pow(10,-bl[addr-1]/al[addr-1])*(pow(sensr,1/al[addr-1]));
+  return pow(10,-bl[addr]/al[addr])*(pow(sensr,1/al[addr]));
 }
 
 
