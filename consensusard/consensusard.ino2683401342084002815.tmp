@@ -14,7 +14,7 @@ int light;
 float dn[N]={0}; 
 float cn; 
 float qn; 
-float Kn[N]={2.2, 24.0};; 
+float Kn[N]={0}; 
 float on; 
 float Ln;
 
@@ -256,8 +256,9 @@ void loop()
   qn=1.0;
   on=0.0;
   Ln=20.0;
+  Kn=[2.2, 24.0];
   
-  light = consensus_function(dn, node, cn, qn, Kn, on, Ln);
+  light = consensus_function(dn, node, cn, qn, Kn, on, Ln, N);
   
   dn[node]=light;
   
