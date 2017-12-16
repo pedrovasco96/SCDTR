@@ -1,12 +1,12 @@
-float compute_func (float qn, int cn, float rho, float d_av[], float d[], int N)
+float compute_func (float qn, int cn, float rho, float d_av[], float d[], int N, int node, float y[] )
 {
-  float min_unconstrained = 0.5*qn*(dunc[node])^2 + cn*dunc[node];
-  for (i = 0; i < N; i++)
+  float min_unconstrained = 0.5*qn*(d[node])^2 + cn*d[node];
+  for (int i = 0; i < N; i++)
     min_unconstrained += y[i]*(d[i]-d_av[i])+(rho/2)*(d[i]-d_av[i])^2;
   return min_unconstrained;
 }
 
-float[] consensus_function(float dn[], int node, float cn, float qn, float Kn[], float on, float Ln, int N)
+float consensus_function(float dn[], int node, float cn, float qn, float Kn[], float on, float Ln, int N)
 {
   float rho = 0.01;
   int iter = 1; int i;
@@ -136,72 +136,109 @@ float[] consensus_function(float dn[], int node, float cn, float qn, float Kn[],
      /*compute function value and if best store new optimum*/
      if (sol_unconstrained)
      {
-         min_unconstrained = compute_func (qn, cn, rho, d_av, dunc, N);
+         min_unconstrained = compute_func (qn, cn, rho, d_av, dunc, N, node, y);
          if (min_unconstrained < min_best_1[iter])
          {
              for (i = 0; i < N; i++)
-              d_best[iter]=dunc[i];
+              d_best[i]=dunc[i];
              min_best_1[iter] = min_unconstrained;
          }
      }
      /*compute function value and if best store new optimum*/
      if (sol_boundary_linear)
      {
-        min_boundary_linear = compute_func (qn, cn, rho, d_av, dlinb, N);
+        min_boundary_linear = compute_func (qn, cn, rho, d_av, dlinb, N, node, y);
         if (min_boundary_linear < min_best_1[iter])
         {
              for (i = 0; i < N; i++)
-              d_best[iter]=dlinb[i];
+              d_best[i]=dlinb[i];
              min_best_1[iter] = min_boundary_linear;
         }
      }
      /* compute function value and if best store new optimum*/
      if (sol_boundary_0)
      { 
-          min_boundary_0 = compute_func (qn, cn, rho, d_av, db0, N);
+          min_boundary_0 = compute_func (qn, cn, rho, d_av, db0, N, node, y);
          if (min_boundary_0 < min_best_1[iter])
          {
              for (i = 0; i < N; i++)
-              d_best[iter]=db0[i];
+              d_best[i]=db0[i];
              min_best_1[iter] = min_boundary_0;
          }
      }
      /* compute function value and if best store new optimum*/
      if (sol_boundary_100)
      { 
-         min_boundary_100 = compute_func (qn, cn, rho, d_av, db100, N);
+         min_boundary_100 = compute_func (qn, cn, rho, d_av, db100, N, node, y);
          if (min_boundary_100 < min_best_1[iter])
+         {
              for (i = 0; i < N; i++)
-              d_best[iter]=db100[i];
+              d_best[i]=db100[i];
              min_best_1[iter] = min_boundary_100;
-         end;
-     end;
+         }
+     }
      /* compute function value and if best store new optimum*/
      if (sol_linear_0) 
      { 
-         min_linear_0 = compute_func (qn, cn, rho, d_av, dblin0, N);
+         min_linear_0 = compute_func (qn, cn, rho, d_av, dblin0, N, node, y);
          if (min_linear_0 < min_best_1[iter])
          {
              for (i = 0; i < N; i++)
-              d_best[iter]=dblin0[i];
+              d_best[i]=dblin0[i];
              min_best_1[iter] = min_linear_0;
          }
      }
      /* compute function value and if best store new optimum*/
      if (sol_linear_100)
      { 
-          min_linear_100 = compute_func (qn, cn, rho, d_av, dblin100, N);
+          min_linear_100 = compute_func (qn, cn, rho, d_av, dblin100, N, node, y);
          if (min_linear_100 < min_best_1[iter])
          {
              for (i = 0; i < N; i++)
-              d_best[iter]=dblin100[i];
+              d_best[i]=dblin100[i];
              min_best_1[iter] = min_linear_100;
          }
      }
-     /*store data and save for next cycle
-     best_d11(i) = d11_best;
-     best_d12(i) = d12_best;
-     d1 = [d11_best;d12_best];*/
+
+     
+     //compute average with available knowledge
+     d1_av = (d1+d2_copy)/2;
+     //update local lagrangian
+     y1 = y1 + rho*(d1-d1_av);
+     //send node 1 solution to neighboors
+     d1_copy = d1;
+   
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  addr = EEPROM.read(0);
+
+  Wire.begin(addr);
+  TWAR = (addr << 1) | 1;
+  
+  Wire.onReceive(receiveEvent);
+
+  
+  Serial.print("address: ");
+  Serial.print(addr);
+  Serial.println();
+}
+
+void receiveEvent(int howMany){
+  while(Wire.available() > 0){
+    red = Wire.read();
+    if(red=='b'){
+      n_done++;  
+      Serial.print("one finished ");
+      Serial.println(n_done);
+    }
+    else if(red=='a'){
+      led_active=1;
+      Serial.println("other led is active");
+    }
   }
 }
 

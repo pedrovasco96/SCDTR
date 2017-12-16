@@ -3,9 +3,9 @@
 #include <Wire.h>
 
 #define N 2
-#define R 160
 
-byte addr;
+
+int addr;
 int c = 1;
 int d = 0;
 int i = 0;
@@ -14,16 +14,17 @@ int red = 0;
 int led_active=0;
 int n_done=0;
 
-
+float R = 160;
 float start_time = 0;
 float curr_time = 0;
 
 float al[N] = {-0.7, -1.1};
 float bl[N] = {4.802, 6.1};
 
+float R_p = R*100.0/255.0;
+float o = 0;
 float buff = 0;
 float K[N]={0};
-byte curr = 1;
 
 void setup() {
   Serial.begin(115200);
@@ -51,10 +52,10 @@ void loop() {
         Serial.println("led ligated");
         delay(1000);
         buff = LUX_value();
-        K[i-1]=R/buff;
+        K[i-1]=R_p/buff;
         
         Wire.beginTransmission(0);
-        Wire.write(d);  
+        Wire.write('a');  
         Wire.endTransmission();    
         Serial.println("Permission granted"); 
       
@@ -81,14 +82,20 @@ void loop() {
         buff = LUX_value();
         K[i-1]=R/buff;
         Wire.beginTransmission(i);
-        Wire.write(c);  
+        Wire.write('b');  
         Wire.endTransmission();
         led_active==0;
       }
     }
+    
     for(i=0;i<N;i++){
       Serial.println(K[i]);
     }
+
+    delay(1000);
+    o = LUX_value();
+    
+    Serial.println(o);
     while(1);
 }
 
@@ -96,12 +103,12 @@ void loop() {
 void receiveEvent(int howMany){
   while(Wire.available() > 0){
     red = Wire.read();
-    if(red==c){
+    if(red=='b'){
       n_done++;  
       Serial.print("one finished ");
       Serial.println(n_done);
     }
-    else if(red==d){
+    else if(red=='a'){
       led_active=1;
       Serial.println("other led is active");
     }
