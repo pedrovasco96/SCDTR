@@ -232,6 +232,11 @@ void setup() {
   Serial.println();
 }
 
+void loop()
+{
+  
+}
+
 void receiveEvent(int howMany){
   while(Wire.available() > 0){
     red = Wire.read();
