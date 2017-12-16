@@ -11,7 +11,7 @@ int led_active=0;
 float compute_func (float qn, int cn, float rho, float d_av[], float d[], int N, int node, float y[] )
 {
   float min_unconstrained = 0.5*qn*pow((d[node]),2) + cn*d[node];
-  for (int i = 0; i < N; i++)
+  for (int i = 1; i <= N; i++)
     min_unconstrained += y[i]*(d[i]-d_av[i])+(rho/2)*pow((d[i]-d_av[i]),2);
   return min_unconstrained;
 }
@@ -39,9 +39,9 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
   float v1; float v2;
   float dlin0[N]; float dlin100[N];
 
-  for (iter = 1; iter <= 50; iter++)
+  for (iter = 0; iter < 50; iter++)
   {
-     min_best_1[iter] = 100000; /*big number*/
+     min_best_1[iter] = 10000; /*big number*/
      sol_unconstrained = 1;
      sol_boundary_linear = 1;
      sol_boundary_0 = 1;
@@ -52,7 +52,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
      u2 = 0;
      u3 = 100;
      n=0; dot=0;
-     for (i = 0; i < N; i++)
+     for (i = 1; i <= N; i++)
      {  
        d_best[i]=-1;
        z[i]=-y[i]+rho*d_av[i];
@@ -73,7 +73,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
      if (dunc[node] < 0 || dunc[node] > 100 || dot < -u1)
        sol_unconstrained = 0;
      /*compute minimum constrained to linear boundary   */
-     for (i = 0; i < N; i++)
+     for (i = 1; i <= N; i++)
       dlinb[i]=p[i]*(z[i]+Kn[i]/n*(w1-u1));
       
      /*check feasibility of minimum constrained to linear boundary*/
@@ -81,7 +81,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
       sol_boundary_linear = 0;
      /*compute minimum constrained to 0 boundary*/
      dot=0;
-     for (i = 0; i < N; i++)
+     for (i = 1; i <= N; i++)
      {
       if(i != node)
         db0[i]=p[i]*z[i];
@@ -93,7 +93,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
      if (db0[node] > 100 || dot < -u1)
       sol_boundary_0 = 0;
      /*compute minimum constrained to 100 boundary*/
-     for (i = 0; i < N; i++)
+     for (i = 1; i <= N; i++)
       db100[i]=db0[i];
      db100[node]=100;
      dot+=100;
@@ -110,7 +110,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
      x2 = det3*w1 + det4*w2;
      v1 = det1*u1;
      v2 = det3*u1;
-     for (i = 0; i < N; i++)
+     for (i = 1; i <= N; i++)
      {
       dblin0[i]=p[i]*z[i]+p[i]*Kn[i]*(x1-v1);
       if (i = node)
@@ -129,7 +129,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
      x2 = det3*w1 + det4*w3;
      v1 = det1*u1 + det2*u3; 
      v2 = det3*u1 + det4*u3;
-     for (i = 0; i < N; i++)
+     for (i = 1; i <= N; i++)
      {
       dblin100[i]=p[i]*z[i]+p[i]*Kn[i]*(x1-v1);
       if (i = node)
@@ -144,7 +144,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
          min_unconstrained = compute_func (qn, cn, rho, d_av, dunc, N, node, y);
          if (min_unconstrained < min_best_1[iter])
          {
-             for (i = 0; i < N; i++)
+             for (i = 1; i <= N; i++)
               d_best[i]=dunc[i];
              min_best_1[iter] = min_unconstrained;
          }
@@ -155,7 +155,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
         min_boundary_linear = compute_func (qn, cn, rho, d_av, dlinb, N, node, y);
         if (min_boundary_linear < min_best_1[iter])
         {
-             for (i = 0; i < N; i++)
+             for (i = 1; i <= N; i++)
               d_best[i]=dlinb[i];
              min_best_1[iter] = min_boundary_linear;
         }
@@ -166,7 +166,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
           min_boundary_0 = compute_func (qn, cn, rho, d_av, db0, N, node, y);
          if (min_boundary_0 < min_best_1[iter])
          {
-             for (i = 0; i < N; i++)
+             for (i = 1; i <= N; i++)
               d_best[i]=db0[i];
              min_best_1[iter] = min_boundary_0;
          }
@@ -177,7 +177,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
          min_boundary_100 = compute_func (qn, cn, rho, d_av, db100, N, node, y);
          if (min_boundary_100 < min_best_1[iter])
          {
-             for (i = 0; i < N; i++)
+             for (i = 1; i <= N; i++)
               d_best[i]=db100[i];
              min_best_1[iter] = min_boundary_100;
          }
@@ -188,7 +188,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
          min_linear_0 = compute_func (qn, cn, rho, d_av, dblin0, N, node, y);
          if (min_linear_0 < min_best_1[iter])
          {
-             for (i = 0; i < N; i++)
+             for (i = 1; i <= N; i++)
               d_best[i]=dblin0[i];
              min_best_1[iter] = min_linear_0;
          }
@@ -199,7 +199,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
           min_linear_100 = compute_func (qn, cn, rho, d_av, dblin100, N, node, y);
          if (min_linear_100 < min_best_1[iter])
          {
-             for (i = 0; i < N; i++)
+             for (i = 1; i <= N; i++)
               d_best[i]=dblin100[i];
              min_best_1[iter] = min_linear_100;
          }
