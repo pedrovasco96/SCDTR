@@ -10,7 +10,7 @@ int c = 1;
 int d = 0;
 int i = 0;
 int j = 0;
-int red = 0;
+char red;
 int led_active=0;
 int n_done=0;
 

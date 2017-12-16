@@ -1,3 +1,14 @@
+#include <EEPROM.h>
+#include <stdio.h>
+#include <Wire.h>
+
+int addr;
+char red;
+int n_done = 0;
+int led_active = 0;
+
+
+
 float compute_func (float qn, int cn, float rho, float d_av[], float d[], int N, int node, float y[] )
 {
   float min_unconstrained = 0.5*qn*(d[node])^2 + cn*d[node];
@@ -10,7 +21,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
 {
   float rho = 0.01;
   int iter = 1; int i;
-  float d_av[N]={0}; float d_in=dn; float d_best[N]; float y[N] = {0};
+  float d_av[N]={0}; float d_best[N]; float y[N] = {0};
   int min_best_1[50] = {0};
   int sol_unconstrained; int sol_boundary_linear;
   int sol_boundary_0; int sol_boundary_100;
@@ -27,17 +38,10 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
   float x1; float x2;
   float v1; float v2;
   float dlin0[N]; float dlin100[N];
-  for (i = 0; i < N; i++)
-  {
-    d_av[0]+=dn[i];
-  }
-  for (i = 1; i < N; i++)
-  {
-    d_av[i]=dn[1];
-  }
+
   for (iter = 1; iter <= 50; iter++)
   {
-     min_best_1(iter) = 100000; /*big number*/
+     min_best_1[iter] = 100000; /*big number*/
      sol_unconstrained = 1;
      sol_boundary_linear = 1;
      sol_boundary_0 = 1;
@@ -70,7 +74,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
        sol_unconstrained = 0;
      /*compute minimum constrained to linear boundary   */
      for (i = 0; i < N; i++)
-      dlinb[i]=p[i]*(z[i]+Kn[i]/n*(w1-u1);
+      dlinb[i]=p[i]*(z[i]+Kn[i]/n*(w1-u1));
      /*check feasibility of minimum constrained to linear boundary*/
      if (dlinb[node] < 0 || dlinb[node] > 100)
       sol_boundary_linear = 0;
@@ -202,11 +206,11 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
 
      
      //compute average with available knowledge
-     d1_av = (d1+d2_copy)/2;
+    // d1_av = (d1+d2_copy)/2;
      //update local lagrangian
-     y1 = y1 + rho*(d1-d1_av);
+   //  y1 = y1 + rho*(d1-d1_av);
      //send node 1 solution to neighboors
-     d1_copy = d1;
+    // d1_copy = d1;
    
   }
 }
