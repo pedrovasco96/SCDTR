@@ -21,10 +21,10 @@ float d_rec = 0;
 int aux;
 
 /*
-union u_tag {
+  union u_tag {
      byte b[4];
      float fval;
-} u;*/
+  } u;*/
 
 float compute_func (float qn, int cn, float rho, float d_av[], float d[], int node, float y[] )
 {
@@ -75,7 +75,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
       d_best[i] = -1;
       z[i] = -y[i] + rho * d_av[i];
       p[i] = 1 / rho;
-      if (i = node)
+      if (i == node)
       {
         z[i] -= cn;
         p[i] = 1 / (rho + qn);
@@ -131,7 +131,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
     for (i = 0; i < N; i++)
     {
       dblin0[i] = p[i] * z[i] + p[i] * Kn[i] * (x1 - v1);
-      if (i = node)
+      if (i == node)
         dblin0[i] += p[i] * (x2 - v2);
     }
     /*check feasibility*/
@@ -150,7 +150,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
     for (i = 0; i < N; i++)
     {
       dblin100[i] = p[i] * z[i] + p[i] * Kn[i] * (x1 - v1);
-      if (i = node)
+      if (i == node)
         dblin100[i] -= p[i] * (x2 - v2);
     }
     /*check feasibility*/
@@ -223,27 +223,31 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
       }
     }
 
-
+    Serial.println("Ready to share");
 
     for (i = 0; i < N; i++) {
       Wire.beginTransmission(0);
       Wire.write('c');
-      aux=int(d_best[i]);
+      Serial.println("Sent c");
+      aux = int(d_best[i]);
       Wire.write(aux);
+      Serial.println("Sent d_best");
       Wire.endTransmission();
 
       while (n_drec < N - 1) {
         Serial.println("waiting for other ds");
-        delay(500);
+        delay(50);
       }
-  
+
       n_drec = 0;
       d_av[i] = (d_rec + d_best[i]) / N;
       y[i] = y[i] + rho * (d_best[i] - d_av[i]);
-      d_rec=0;
+      d_rec = 0;
 
     }
 
+    Serial.print("Finished iteration");
+    Serial.println(iter);
   }
   return d_best[node];
 }

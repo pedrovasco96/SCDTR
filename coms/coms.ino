@@ -4,9 +4,10 @@
 
 
 byte addr;
-int c;
 int i = 3;
 int j= 0; 
+float z = 56.8;
+char lel;
 
 void setup() {
   Serial.begin(115200);
@@ -26,28 +27,28 @@ void setup() {
 
 void loop() {
   if(Serial.available() > 0 ) {
-    c = Serial.parseInt();
-    if(addr == 1){
-      Wire.beginTransmission(2); 
+    lel = Serial.read();
+    if(addr == 0){
+      Wire.beginTransmission(1); 
       Serial.print("Sending data ");
-      Serial.print(c);
+      Serial.print(z);
       Serial.println(" to 2");
     } 
-    else if(addr == 2){
-      Wire.beginTransmission(1);
+    else if(addr == 1){
+      Wire.beginTransmission(0);
       Serial.print("Sending data ");
-      Serial.print(c);
+      Serial.print(z);
       Serial.println(" to 1");
     }
        
-    Wire.write(c);  
+    Wire.write(z);  
     Wire.endTransmission();
   }
 }
 
 void receiveEvent(int howMany){
   while(Wire.available() > 0)  {
-    c = Wire.read(); 
+    float c = Wire.read(); 
     Serial.print("Received data: ");
     Serial.print(c);
     Serial.println(); 
