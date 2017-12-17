@@ -19,6 +19,9 @@ float Ln;
 int n_drec = 0;
 float d_rec = 0;
 int aux;
+int flag[N] = {0};
+int start = 0;
+int adr_out;
 
 /*
   union u_tag {
@@ -280,6 +283,8 @@ void setup() {
 
   Serial.print("address: ");
   Serial.println(addr);
+  adr_out = addr;
+  flag[addr] = 1;
 }
 
 void loop()
@@ -287,6 +292,19 @@ void loop()
   // CALIB
 
   node = addr;
+
+  while (start < N-1)
+  {
+    Wire.beginTransmission(0);
+    Wire.write('d');
+    Wire.write(addr);
+    Wire.endTransmission();
+    if (flag[adr_out] == 0)
+    {
+      start++;
+      flag[adr_out] = 1;
+    }
+  }
 
 
   light = consensus_function(dn, node, cn, qn, Kn, on, Ln);
@@ -318,6 +336,9 @@ void receiveEvent(int howMany) {
       float buff = Wire.read();
       d_rec += buff;
       n_drec++;
+    }
+    else if (red == 'd') {
+      adr_out = Wire.read();
     }
   }
 }
