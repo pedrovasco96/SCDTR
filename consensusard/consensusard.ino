@@ -18,6 +18,13 @@ float on;
 float Ln;
 int n_drec = 0;
 float d_rec = 0;
+int aux;
+
+/*
+union u_tag {
+     byte b[4];
+     float fval;
+} u;*/
 
 float compute_func (float qn, int cn, float rho, float d_av[], float d[], int node, float y[] )
 {
@@ -221,16 +228,19 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
     for (i = 0; i < N; i++) {
       Wire.beginTransmission(0);
       Wire.write('c');
-      Wire.write(d_best[i]);
+      aux=int(d_best[i]);
+      Wire.write(aux);
       Wire.endTransmission();
 
       while (n_drec < N - 1) {
         Serial.println("waiting for other ds");
         delay(500);
       }
+  
       n_drec = 0;
       d_av[i] = (d_rec + d_best[i]) / N;
       y[i] = y[i] + rho * (d_best[i] - d_av[i]);
+      d_rec=0;
 
     }
 
