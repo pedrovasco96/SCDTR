@@ -13,7 +13,7 @@ int light;
 float dn[N] = {0};
 float cn;
 float qn;
-float Kn[N];
+float Kn[N] = {0};
 float on;
 float Ln;
 int n_drec = 0;
@@ -23,11 +23,6 @@ int flag[N] = {0};
 int start = 0;
 int adr_out;
 
-/*
-  union u_tag {
-     byte b[4];
-     float fval;
-  } u;*/
 
 float compute_func (float qn, int cn, float rho, float d_av[], float d[], int node, float y[] )
 {
@@ -41,7 +36,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
 {
   float rho = 0.01;
   int iter = 1; int i;
-  float d_av[N] = {0}; float d_best[N]; float y[N] = {0};
+  float d_av[N] = {0}; float d_best[N] = {0}; float y[N] = {0};
   int min_best_1[50] = {0};
   int sol_unconstrained; int sol_boundary_linear;
   int sol_boundary_0; int sol_boundary_100;
@@ -60,7 +55,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
   float v1; float v2;
   float dlin0[N]; float dlin100[N];
 
-  for (iter = 0; iter < 50; iter++)
+  for (iter = 0; iter < 10; iter++)
   {
     min_best_1[iter] = 10000; /*big number*/
     sol_unconstrained = 1;
@@ -239,7 +234,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
 
       while (n_drec < N - 1) {
         Serial.println("waiting for other ds");
-        delay(50);
+        delay(500);
       }
 
       n_drec = 0;
@@ -293,18 +288,27 @@ void loop()
 
   node = addr;
 
-  while (start < N-1)
+  while (start < N - 1)
   {
     Wire.beginTransmission(0);
     Wire.write('d');
     Wire.write(addr);
     Wire.endTransmission();
+    Serial.println("foda se");
     if (flag[adr_out] == 0)
     {
       start++;
       flag[adr_out] = 1;
     }
+   delay(500);
   }
+
+  Wire.beginTransmission(0);
+  Wire.write('d');
+  Wire.write(addr);
+  Wire.endTransmission();
+
+  Serial.println("Starting consensus");
 
 
   light = consensus_function(dn, node, cn, qn, Kn, on, Ln);
