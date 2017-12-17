@@ -13,7 +13,7 @@ int light;
 float dn[N] = {0};
 float cn;
 float qn;
-float Kn[N] = {0};
+float Kn[N];
 float on;
 float Ln;
 int n_drec = 0;
@@ -23,6 +23,11 @@ int flag[N] = {0};
 int start = 0;
 int adr_out;
 
+/*
+  union u_tag {
+     byte b[4];
+     float fval;
+  } u;*/
 
 float compute_func (float qn, int cn, float rho, float d_av[], float d[], int node, float y[] )
 {
@@ -36,7 +41,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
 {
   float rho = 0.01;
   int iter = 1; int i;
-  float d_av[N] = {0}; float d_best[N] = {0}; float y[N] = {0};
+  float d_av[N] = {0}; float d_best[N]; float y[N] = {0};
   int min_best_1[50] = {0};
   int sol_unconstrained; int sol_boundary_linear;
   int sol_boundary_0; int sol_boundary_100;
@@ -44,7 +49,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
   float z[N];
   float u1 = on - Ln; int u2 = 0; int u3 = 100;
   float p[N]; float n;
-  float w1=0; float w2; float w3; float dot;
+  float w1; float w2; float w3; float dot;
   float dunc[N]; float dlinb[N]; float db0[N]; float db100[N];
   float dblin0[N]; float dblin100[N];
   float min_unconstrained;
@@ -55,7 +60,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
   float v1; float v2;
   float dlin0[N]; float dlin100[N];
 
-  for (iter = 0; iter < 10; iter++)
+  for (iter = 0; iter < 50; iter++)
   {
     min_best_1[iter] = 10000; /*big number*/
     sol_unconstrained = 1;
@@ -234,7 +239,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
 
       while (n_drec < N - 1) {
         Serial.println("waiting for other ds");
-        delay(500);
+        delay(50);
       }
 
       n_drec = 0;
@@ -264,12 +269,12 @@ void setup() {
   qn = 0.0;
   on = 0.0;
 
-  if (addr == 0) {
+  if (addr == 1) {
     Kn[0] = 2.1;
     Kn[1] = 24.0;
     Ln = 20.0;
   }
-  else if (addr == 1) {
+  else if (addr == 2) {
     Kn[0] = 2.3;
     Kn[1] = 31.0;
     Ln = 20.0;
@@ -279,7 +284,7 @@ void setup() {
   Serial.print("address: ");
   Serial.println(addr);
   adr_out = addr;
-  flag[addr] = 1;
+  flag[addr-1] = 1;
 }
 
 void loop()
@@ -288,27 +293,18 @@ void loop()
 
   node = addr;
 
-  while (start < N - 1)
+  while (start < N-1)
   {
     Wire.beginTransmission(0);
     Wire.write('d');
     Wire.write(addr);
     Wire.endTransmission();
-    Serial.println("foda se");
-    if (flag[adr_out] == 0)
+    if (flag[adr_out-1] == 0)
     {
       start++;
-      flag[adr_out] = 1;
+      flag[adr_out-1] = 1;
     }
-   delay(500);
   }
-
-  Wire.beginTransmission(0);
-  Wire.write('d');
-  Wire.write(addr);
-  Wire.endTransmission();
-
-  Serial.println("Starting consensus");
 
 
   light = consensus_function(dn, node, cn, qn, Kn, on, Ln);
