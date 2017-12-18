@@ -1,6 +1,6 @@
 %The system
-k11 = 2; k12 = 1; k21 = 1; k22 = 2;
-L1 = 150; o1 = 30; L2 = 80; o2 = 0;
+k11 = 2.0; k12 = 26.71; k21 = 20.33; k22 = 2.1;
+L1 = 20; o1 = 0; L2 = 20; o2 = 0;
 K = [k11, k12 ; k21 , k22];
 L = [L1;L2]; o = [o1;o2];
 
@@ -155,7 +155,7 @@ for i=1:50,
        if min_linear_100 < min_best_1(i),
            d11_best = d11u;
            d12_best = d12u;
-           min_best_1_(i) = min_linear100;
+           min_best_1_(i) = min_linear_100;
        end;
    end;
    %store data and save for next cycle
@@ -309,7 +309,7 @@ for i=1:50,
        if min_linear_100 < min_best_2(i),
            d21_best = d21u;
            d22_best = d22u;
-           min_best_2(i) = min_linear100;
+           min_best_2(i) = min_linear_100;
        end;
    end;
    %store data and save for next cycle

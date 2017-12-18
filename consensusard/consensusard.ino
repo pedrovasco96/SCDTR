@@ -23,6 +23,8 @@ int flag[N] = {0};
 int start = 0;
 int adr_out;
 
+float start_time = 0;
+float curr_time = 0;
 
 float compute_func (float qn, int cn, float rho, float d_av[], float d[], int node, float y[] )
 {
@@ -44,7 +46,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
   float z[N];
   float u1 = on - Ln; int u2 = 0; int u3 = 100;
   float p[N]; float n;
-  float w1; float w2; float w3; float dot;
+  float w1 = 0; float w2; float w3; float dot;
   float dunc[N]; float dlinb[N]; float db0[N]; float db100[N];
   float dblin0[N]; float dblin100[N];
   float min_unconstrained;
@@ -55,7 +57,38 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
   float v1; float v2;
   float dlin0[N]; float dlin100[N];
 
-  for (iter = 0; iter < 10; iter++)
+  Serial.print("dn0= ");
+  Serial.println(dn[0]);
+  Serial.print("dn1= ");
+  Serial.println(dn[1]);
+
+  Serial.print("d_av0= ");
+  Serial.println(d_av[0]);
+  Serial.print("d_av1= ");
+  Serial.println(d_av[1]);
+
+
+  Serial.print("cn= ");
+  Serial.println(cn);
+
+  Serial.print("qn= ");
+  Serial.println(qn);
+
+  Serial.print("Kn0= ");
+  Serial.println(Kn[0]);
+  Serial.print("Kn1= ");
+  Serial.println(Kn[1]);
+
+  Serial.print("on= ");
+  Serial.println(on);
+
+  Serial.print("Ln= ");
+  Serial.println(Ln);
+
+
+
+
+  for (iter = 0; iter < 1; iter++)
   {
     min_best_1[iter] = 10000; /*big number*/
     sol_unconstrained = 1;
@@ -112,7 +145,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
     for (i = 0; i < N; i++)
       db100[i] = db0[i];
     db100[node] = 100;
-    dot += 100;
+    dot += 100 * Kn[node];
     /*check feasibility of minimum constrained to 100 boundary*/
     if (db0 < 0 || dot < -u1)
       sol_boundary_100 = 0;
@@ -221,34 +254,53 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
       }
     }
 
-    Serial.println("Ready to share");
+    // Serial.println("Ready to share");
 
     for (i = 0; i < N; i++) {
-      Wire.beginTransmission(0);
-      Wire.write('c');
-      Serial.println("Sent c");
-      aux = int(d_best[i]);
-      Wire.write(aux);
-      Serial.println("Sent d_best");
-      Wire.endTransmission();
+      for (int sending = 0; sending < N; sending++) {
+        if (sending == node) {
+          n_done = 0;
+          Wire.beginTransmission(0);
+          Wire.write('c');
+          //Serial.println("Sent c");
+          aux = int(d_best[i]);
+          Wire.write(aux);
+          // Serial.println("Sent d_best");
+          Wire.endTransmission();
 
-      while (n_drec < N - 1) {
-        Serial.println("waiting for other ds");
-        delay(500);
+          start_time = millis();
+          while (n_done < N - 1) {
+            delay(50);
+            curr_time = millis();
+            if (curr_time - start_time >= 5000) {
+              sending--;
+              break;
+            }
+          }
+        }
+        else {
+          while (n_drec < 1) {
+            delay(50);
+          }
+          Wire.beginTransmission(sending);
+          Wire.write('b');
+          Wire.endTransmission();
+          n_drec = 0;
+        }
       }
-
-      n_drec = 0;
       d_av[i] = (d_rec + d_best[i]) / N;
       y[i] = y[i] + rho * (d_best[i] - d_av[i]);
       d_rec = 0;
-
     }
 
-    Serial.print("Finished iteration");
+    Serial.print("Finished iteration ");
     Serial.println(iter);
   }
   return d_best[node];
+
 }
+
+
 
 void setup() {
   Serial.begin(115200);
@@ -265,13 +317,13 @@ void setup() {
   on = 0.0;
 
   if (addr == 0) {
-    Kn[0] = 2.1;
-    Kn[1] = 24.0;
+    Kn[0] = 0.5;
+    Kn[1] = 0.1;
     Ln = 20.0;
   }
   else if (addr == 1) {
-    Kn[0] = 2.3;
-    Kn[1] = 31.0;
+    Kn[0] = 0.13;
+    Kn[1] = 0.49;
     Ln = 20.0;
   }
 
@@ -288,28 +340,7 @@ void loop()
 
   node = addr;
 
-  while (start < N - 1)
-  {
-    Wire.beginTransmission(0);
-    Wire.write('d');
-    Wire.write(addr);
-    Wire.endTransmission();
-    Serial.println("foda se");
-    if (flag[adr_out] == 0)
-    {
-      start++;
-      flag[adr_out] = 1;
-    }
-   delay(500);
-  }
-
-  Wire.beginTransmission(0);
-  Wire.write('d');
-  Wire.write(addr);
-  Wire.endTransmission();
-
   Serial.println("Starting consensus");
-
 
   light = consensus_function(dn, node, cn, qn, Kn, on, Ln);
 
@@ -329,8 +360,8 @@ void receiveEvent(int howMany) {
     char red = Wire.read();
     if (red == 'b') {
       n_done++;
-      Serial.print("one finished ");
-      Serial.println(n_done);
+      //  Serial.print("one finished ");
+      // Serial.println(n_done);
     }
     else if (red == 'a') {
       led_active = 1;
@@ -340,9 +371,6 @@ void receiveEvent(int howMany) {
       float buff = Wire.read();
       d_rec += buff;
       n_drec++;
-    }
-    else if (red == 'd') {
-      adr_out = Wire.read();
     }
   }
 }

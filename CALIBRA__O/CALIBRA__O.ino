@@ -50,7 +50,8 @@ void loop() {
       Serial.println("led ligated");
       delay(1000);
       buff = LUX_value();
-      K[i] = R_p / buff;
+      //Serial.println(buff);
+      K[i] = buff / R_p;
 
       Wire.beginTransmission(0);
       Wire.write('a');
@@ -78,7 +79,8 @@ void loop() {
       Serial.println("got permission");
       delay(1000);
       buff = LUX_value();
-      K[i] = R / buff;
+      //Serial.println(buff);
+      K[i] = buff / R_p;
       Wire.beginTransmission(i);
       Wire.write('b');
       Wire.endTransmission();
