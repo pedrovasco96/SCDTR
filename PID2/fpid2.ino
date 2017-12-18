@@ -1,30 +1,32 @@
+#include "pid2.h"
 #include <EEPROM.h>
 #include <stdio.h>
 #include <Wire.h>
 #include <math.h>
 
-#define N 2
+using namespace std;
 
-int addr;
-int n_done = 0;
-int led_active = 0;
-int node;
-int light;
-float dn[N] = {0};
-float cn;
-float qn;
-float Kn[N] = {0};
-float on;
-float Ln;
-int n_drec = 0;
-float d_rec = 0;
-int aux;
-int flag[N] = {0};
-int start = 0;
-int adr_out;
+PID::PID(){
+  Kp=0.1419;
+  Ki=606.06;
+  T=0.025;
+  b = 0.2; //has values between 0 and 1, should be step experimentally to reduce overshoot
+  K1=Kp*b;
+  K2=Kp*Ki*T/2;
+  k0=7;
+  e=0;
+  p=0;
+  i=0;
+  u=0;
+  final_u=0;
+  uff=0;
+  LUX_ant=0;
+  i_ant=0;
+  e_ant=0;
+}
 
-float start_time = 0;
-float curr_time = 0;
+PID::~PID(){
+}
 
 float compute_func (float qn, int cn, float rho, float d_av[], float d[], int node, float y[] )
 {
@@ -262,78 +264,47 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
 
 }
 
-
-
-void setup() {
-  Serial.begin(115200);
-
-  addr = EEPROM.read(0);
-
-  Wire.begin(addr);
-  TWAR = (addr << 1) | 1;
-
-  Wire.onReceive(receiveEvent);
-
-  cn = 1.0;
-  qn = 0.0;
-  on = 0.0;
-
-  if (addr == 0) {
-    Kn[0] = 0.5;
-    Kn[1] = 0.1;
-    Ln = 20.0;
-  }
-  else if (addr == 1) {
-    Kn[0] = 0.13;
-    Kn[1] = 0.49;
-    Ln = 20.0;
-  }
-
-
-  Serial.print("address: ");
-  Serial.println(addr);
-  adr_out = addr;
-  flag[addr] = 1;
-}
-
-void loop()
+float PID::control_signal(float ref, float LUX)
 {
-  // CALIB
+  // defines error
+  e=ref-LUX;
 
-  node = addr;
 
-  Serial.println("Starting consensus");
-
-  light = consensus_function(dn, node, cn, qn, Kn, on, Ln);
-
-  Serial.print("d = ");
-  Serial.println(light);
-
-  light = light / 100.0 * 255.0;
-  analogWrite(9, light);
-
-  while (1);
-
-  //PID
-}
-
-void receiveEvent(int howMany) {
-  while (Wire.available() > 0) {
-    char red = Wire.read();
-    if (red == 'b') {
-      n_done++;
-      //  Serial.print("one finished ");
-      // Serial.println(n_done);
-    }
-    else if (red == 'a') {
-      led_active = 1;
-      Serial.println("other led is active");
-    }
-    else if (red == 'c') {
-      float buff = Wire.read();
-      d_rec += buff;
-      n_drec++;
-    }
+  if(flag==1 && ref_change == 1){
+    uff = k0*ref;
+    ref_change = 0;
   }
-}
+  else{
+    // proporcional control
+     p=K1*ref-Kp*LUX;
+     
+    // integral control
+    i=i_ant+K2*(e+e_ant);
+  
+    //Anti-WindUp
+    i = constrain(i, -uff-5, uff+5);
+  } 
 
+
+  u=p+i+uff;
+
+    //deadzone
+    if  ( u >=  2)
+    final_u = u-2;
+  else  if  (u  <=  -2)
+    final_u = u-2;
+  else
+    final_u = 0;
+
+
+/*  Serial.print("i:");
+  Serial.print(i);
+  Serial.print(" u:");
+  Serial.print(u);
+  Serial.print(" "); */
+
+  i_ant=i;
+  e_ant=e;
+
+  return final_u;
+}
