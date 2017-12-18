@@ -88,7 +88,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
 
 
 
-  for (iter = 0; iter < 1; iter++)
+  for (iter = 0; iter < 50; iter++)
   {
     min_best_1[iter] = 10000; /*big number*/
     sol_unconstrained = 1;
@@ -100,6 +100,7 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
     u1 = on - Ln;
     u2 = 0;
     u3 = 100;
+    w1=0;
     n = 0; dot = 0;
     for (i = 0; i < N; i++)
     {
@@ -269,14 +270,6 @@ float consensus_function(float dn[], int node, float cn, float qn, float Kn[], f
           Wire.endTransmission();
 
           start_time = millis();
-          while (n_done < N - 1) {
-            delay(50);
-            curr_time = millis();
-            if (curr_time - start_time >= 5000) {
-              sending--;
-              break;
-            }
-          }
         }
         else {
           while (n_drec < 1) {
