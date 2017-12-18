@@ -29,7 +29,7 @@ float curr_time = 0;
 float compute_func (float qn, int cn, float rho, float d_av[], float d[], int node, float y[] )
 {
   float min_unconstrained = 0.5 * qn * pow((d[node]), 2) + cn * d[node];
-  for (int i = 1; i <= N; i++)
+  for (int i = 0; i < N; i++)
     min_unconstrained += y[i] * (d[i] - d_av[i]) + (rho / 2) * pow((d[i] - d_av[i]), 2);
   return min_unconstrained;
 }
