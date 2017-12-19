@@ -176,7 +176,7 @@ void loop() {
   Ln = ref;
 
   // defines the control value we should input
-  light = pid.control_signal(ref, LUX);
+  light = pid.control_signal();
 
   // limit the control value range
   light = constrain(light, 0, 255);

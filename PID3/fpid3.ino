@@ -24,7 +24,7 @@ PID::PID() {
 PID::~PID() {
 }
 
-float PID::control_signal(float ref, float LUX)
+float PID::control_signal()
 {
   // defines error
   e = ref - LUX;

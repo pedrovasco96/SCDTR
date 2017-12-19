@@ -24,7 +24,7 @@ class PID
   public:
     PID();
     ~PID();
-    float control_signal(float ref, float LUX);
+    float control_signal();
 };
 
 #endif
