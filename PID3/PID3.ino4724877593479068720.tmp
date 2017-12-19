@@ -75,6 +75,18 @@ void setup() {
 
   cn = 1.0;
   qn = 0.0;
+  on = 0.0;
+
+  if (addr == 0) {
+    Kn[0] = 0.5;
+    Kn[1] = 0.1;
+    Ln = 20.0;
+  }
+  else if (addr == 1) {
+    Kn[0] = 0.13;
+    Kn[1] = 0.49;
+    Ln = 20.0;
+  }
 
   Serial.print("address: ");
   Serial.println(addr);
@@ -153,8 +165,8 @@ void loop() {
       Serial.println(Kn[i]);
     }
     delay(1000);
-    on = LUX_value();
-    Serial.println(on);
+    o = LUX_value();
+    Serial.println(o);
     calib=0;
     ref_change=1;
   }

@@ -10,7 +10,7 @@ int c = 1;
 int d = 0;
 int i = 0;
 int j = 0;
-int led_active = 0;
+volatile int led_active = 0;
 int n_done = 0;
 
 float R = 160;
@@ -60,7 +60,6 @@ void loop() {
 
       start_time = millis();
       while (n_done < N - 1) {
-        delay(50);
         curr_time = millis();
         if (curr_time - start_time >= 5000) {
           i--;
@@ -73,11 +72,8 @@ void loop() {
 
     }
     else {
-      while (led_active == 0) {
-        delay(50);
-      }
+      while (led_active == 0);
       Serial.println("got permission");
-      delay(1000);
       buff = LUX_value();
       //Serial.println(buff);
       K[i] = buff / R_p;
