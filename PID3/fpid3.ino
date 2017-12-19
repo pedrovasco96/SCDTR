@@ -29,8 +29,8 @@ float PID::control_signal(float ref, float LUX)
   // defines error
   e = ref - LUX;
 
-
-  if (flag == 1 && ref_change == 1) {
+  if (ref_change == 1) {
+    Serial.println("consensus");
     uff = consensus_function();
     uff = uff / 100 * 255;
     //uff = k0*ref;

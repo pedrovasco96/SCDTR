@@ -12,9 +12,9 @@ float ref_low = 11.62; // 1/3 * MAX_LUX
 float ref_high = 23.25; // 2/3 * MAX_LUX
 float ref;
 float prev_ref = 0;
-int ref_change;
+int ref_change = 1;
 float PWM;
-int flag=1;
+int flag = 1;
 int aux;
 float LUX;
 float sensr;
@@ -39,21 +39,6 @@ float d_rec = 0;
 float dn[N] = {0};
 
 PID pid;
-
-// Function that defines the appropriate reference LUX value
-// This reference can be changed with the circuit potenciometer
-float occupation()
-{
-  int ocp=analogRead(A1);
-  if(addr!=1)
-  {
-    return ref_low;
-  }
-  else
-  {
-    return ref_low;
-  }
-}
 
 // This function computes the value in LUX in the box read by the LDR
 float LUX_value()
@@ -100,6 +85,8 @@ void setup() {
   Serial.print("address: ");
   Serial.println(addr);
 
+  ref = ref_low;
+
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(ledPin, OUTPUT);
@@ -111,42 +98,48 @@ void setup() {
 void loop() {
 
   node = addr;
-  
+
   // Enables or disables the feedforward term
-  /*if (Serial.available() > 0) {
+  if (Serial.available() > 0) {
     aux = Serial.parseInt();
-    if(aux == 0 || aux == 1)
+    if (aux == 0)
     {
-      flag = aux;
+      ref = ref_low;
       ref_change = 1;
     }
-  }*/
+    else if (aux == 1)
+    {
+      ref = ref_high;
+      ref_change = 1;
+    }
+    Wire.beginTransmission(0);
+    Wire.write('r');
+    Wire.endTransmission();
+  }
 
   start_time = millis();
 
+  /*ref=occupation();
+    if(prev_ref != ref)
+    ref_change = 1;*/
+
+  //prev_ref = ref;
 
 
-  ref=occupation();
-  if(prev_ref != ref)
-    ref_change = 1;
-
-  prev_ref = ref;
-
- 
   //reads LUX value
-  LUX=LUX_value();
+  LUX = LUX_value();
 
   Ln = ref;
 
   // defines the control value we should input
-  light=pid.control_signal(ref, LUX);
+  light = pid.control_signal(ref, LUX);
 
   // limit the control value range
-  light=constrain(light, 0, 255);
+  light = constrain(light, 0, 255);
 
   analogWrite(ledPin, light);
 
-  PWM=light*100.0/255.0;
+  PWM = light * 100.0 / 255.0;
 
   Serial.print(ref);
   Serial.print("\t");
@@ -157,17 +150,11 @@ void loop() {
   Serial.print(flag);
   Serial.print("\t");
   Serial.print(millis());
-
-  if(ref_change == 1 && flag == 1){
-    Serial.print(" ");
- //   Serial.print("FeedFoward");    
-  }
-
   Serial.println();
 
   end_time = millis();
   time_ = end_time - start_time;
-  delay(25-time_);
+  delay(25 - time_);
 
 }
 
@@ -187,6 +174,9 @@ void receiveEvent(int howMany) {
       float buff = Wire.read();
       d_rec += buff;
       n_drec++;
+    }
+    else if (red == 'r') {
+      ref_change=1;
     }
   }
 }
