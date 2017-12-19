@@ -1,4 +1,4 @@
-#include "pid2.h"
+#include "pid3.h"
 #include <stdio.h>
 #include <EEPROM.h>
 #include <Wire.h>
@@ -12,9 +12,9 @@ float ref_low = 11.62; // 1/3 * MAX_LUX
 float ref_high = 23.25; // 2/3 * MAX_LUX
 float ref;
 float prev_ref = 0;
-int ref_change = 1;
+int ref_change;
 float PWM;
-int flag = 1;
+int flag=1;
 int aux;
 float LUX;
 float sensr;
@@ -32,10 +32,10 @@ float on;
 float Ln;
 int n_done = 0;
 int led_active = 0;
+int node;
 int n_drec = 0;
 float d_rec = 0;
-int node;
-float dn[N] = {0};
+
 
 PID pid;
 
@@ -43,10 +43,10 @@ PID pid;
 // This reference can be changed with the circuit potenciometer
 float occupation()
 {
-  int ocp = analogRead(A1);
-  if (ocp < 500)
+  int ocp=analogRead(A1);
+  if(ocp<500)
   {
-    return ref_low;
+    return ref_high;
   }
   else
   {
@@ -88,12 +88,12 @@ void setup() {
   if (addr == 0) {
     Kn[0] = 0.5;
     Kn[1] = 0.1;
-    Ln = 20.0;
+    Ln = ref_high;
   }
   else if (addr == 1) {
     Kn[0] = 0.13;
     Kn[1] = 0.49;
-    Ln = 20.0;
+    Ln = ref_high;
   }
 
   Serial.print("address: ");
@@ -109,77 +109,63 @@ void setup() {
 
 void loop() {
 
+  node = addr;
+  
   // Enables or disables the feedforward term
-  /*if (Serial.available() > 0) {
+  if (Serial.available() > 0) {
     aux = Serial.parseInt();
     if(aux == 0 || aux == 1)
     {
       flag = aux;
       ref_change = 1;
     }
-    }*/
+  }
 
   start_time = millis();
 
-  //ref=occupation();
-  if (prev_ref != ref)
+
+
+  ref=occupation();
+  if(prev_ref != ref)
     ref_change = 1;
 
   prev_ref = ref;
 
-  node = addr;
-
-  Serial.print("lightinit=");
-  Serial.println(light);
-  analogWrite(ledPin, light);
-
-  // Changes LUX reference
-  /*if (Serial.available() > 0) {
-    aux = Serial.parseInt();
-    if(aux==1)
-    {
-      ref=ref_high;
-    }
-    else if(aux==0)
-    {
-      ref=ref_low;
-    }
-
-    }*/
-
+ 
   //reads LUX value
-  LUX = LUX_value();
+  LUX=LUX_value();
 
   // defines the control value we should input
-  light = pid.control_signal(ref, LUX, dn, node, cn, qn, Kn, on, Ln);
-  Serial.print("light=");
-  Serial.println(light);
+  light=pid.control_signal(ref, LUX);
 
   // limit the control value range
-  light = constrain(light, 0, 255);
-  Serial.print("light=");
-  Serial.println(light);
-  analogWrite(ledPin, light);
-  
-  PWM = light * 100.0 / 255.0;
+  light=constrain(light, 0, 255);
 
-  /*Serial.print(ref);
-    Serial.print("\t");
-    Serial.print(LUX);
-    Serial.print("\t");
-    Serial.print(PWM);
-    Serial.print("\t");
-    Serial.print(flag);
-    Serial.print("\t");
-    Serial.print(millis());*/
+  analogWrite(ledPin, light);
+
+  PWM=light*100.0/255.0;
+
+  Serial.print(ref);
+  Serial.print("\t");
+  Serial.print(LUX);
+  Serial.print("\t");
+  Serial.print(PWM);
+  Serial.print("\t");
+  Serial.print(flag);
+  Serial.print("\t");
+  Serial.print(millis());
+
+  if(ref_change == 1 && flag == 1){
+    Serial.print(" ");
+ //   Serial.print("FeedFoward");    
+  }
 
   Serial.println();
 
   end_time = millis();
   time_ = end_time - start_time;
-  Serial.print("time_=");
-  Serial.println(time_);
-  delay(250 - time_);
+  delay(25-time_);
+
 }
 
 void receiveEvent(int howMany) {
