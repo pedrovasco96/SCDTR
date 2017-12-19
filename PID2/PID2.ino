@@ -31,8 +31,6 @@ float qn;
 float Kn[N] = {0};
 float on;
 float Ln;
-int flag1[N] = {0};
-int adr_out;
 int n_done = 0;
 int led_active = 0;
 int n_drec = 0;
@@ -101,8 +99,6 @@ void setup() {
 
   Serial.print("address: ");
   Serial.println(addr);
-  adr_out = addr;
-  flag1[addr] = 1;
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -144,6 +140,21 @@ void loop() {
 
   while (1)
   {
+
+    // Changes LUX reference
+    /*if (Serial.available() > 0) {
+      aux = Serial.parseInt();
+      if(aux==1)
+      {
+        ref=ref_high;
+      }
+      else if(aux==0)
+      {
+        ref=ref_low;
+      }
+      
+     }*/
+      
     //reads LUX value
     LUX = LUX_value();
 
