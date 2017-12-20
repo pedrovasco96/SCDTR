@@ -8,6 +8,8 @@ int i = 3;
 int j = 0;
 float z = 56.8;
 char lel;
+int bufa;
+float ref, ref_high, ref_low, ref_change, calib;
 
 void setup() {
   Serial.begin(115200);
@@ -27,32 +29,53 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available() > 0 ) {
-    lel = Serial.read();
-    if (addr == 0) {
-      Wire.beginTransmission(0);
-      Serial.print("Sending data ");
-      Serial.print(lel);
-      Serial.println(" to 1");
-    }
-    else if (addr == 1) {
-      Wire.beginTransmission(0);
-      Serial.print("Sending data ");
-      Serial.print(lel);
-      Serial.println(" to 0");
-    }
+  if (Serial.available() > 0) {
+    char aux = Serial.read();
 
-    Wire.write(lel);
-    Wire.endTransmission();
+    if (aux == 's' || aux == 'u')
+    {
+      int target = Serial.parseInt();
+      if (target == 0) {
+        if (aux == 's')
+          ref = ref_high;
+        else
+          ref = ref_low;
+      }
+      Wire.beginTransmission(0);
+      Wire.write(aux);
+      Wire.write(target);
+      Wire.endTransmission();
+
+      ref_change = 1;
+    }
+    else if (aux == 'r') {
+      calib = 1;
+      Wire.beginTransmission(0);
+      Wire.write(aux);
+      Wire.endTransmission();
+
+    }
   }
 }
 
 void receiveEvent(int howMany) {
   while (Wire.available() > 0)  {
-    char c = Wire.read();
-    Serial.print("Received data: ");
-    Serial.print(c);
-    Serial.println();
+    char red = Wire.read();
+    if (red == 's') {
+      bufa = Wire.read();
+      if (addr == bufa) {
+        Serial.println(red);
+        Serial.println(bufa);
+      }
+
+    }
+    else if (red == 'u') {
+      bufa = Wire.read();
+      if (addr == bufa) {
+        Serial.println(red);
+        Serial.println(bufa);
+      }
+    }
   }
 }
 

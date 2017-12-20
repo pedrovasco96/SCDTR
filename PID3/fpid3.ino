@@ -26,9 +26,10 @@ PID::~PID() {
 
 float PID::control_signal()
 {
+  
   // defines error
   e = ref - LUX;
-
+  Serial.println(ref);
   if (ref_change == 1) {
     Serial.println("consensus");
     uff = consensus_function();
@@ -81,6 +82,7 @@ float compute_func (float rho, float d_av[], float d[], float y[] )
 
 float consensus_function()
 {
+  Ln = ref;
   float rho = 0.01;
   int iter = 1; int i;
   float d_av[N] = {0}; float d_best[N] = {0}; float y[N] = {0};
@@ -286,12 +288,8 @@ float consensus_function()
           start_time = millis();
         }
         else {
-          while (n_drec < 1) {
-            delay(1);
-          }
-          Wire.beginTransmission(sending);
-          Wire.write('b');
-          Wire.endTransmission();
+          while (n_drec < 1);
+
           n_drec = 0;
         }
       }
@@ -303,6 +301,11 @@ float consensus_function()
     //Serial.print("Finished iteration ");
     //Serial.println(iter);
   }
+  /*ref = 0;
+  for (int i = 0; i < N; i++) {
+    ref += Kn[i] * d_best[i];
+  }
+  ref += on; */
   return d_best[node];
 
 }

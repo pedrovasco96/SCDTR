@@ -13,7 +13,7 @@ float ref_high = 23.25; // 2/3 * MAX_LUX
 float ref;
 float prev_ref = 0;
 int ref_change = 1;
-int calib=1;
+int calib = 1;
 float PWM;
 int flag = 1;
 int aux;
@@ -34,14 +34,15 @@ float Ln;
 int n_done = 0;
 volatile int led_active = 0;
 int node;
-int n_drec = 0;
+volatile int n_drec = 0;
 float d_rec = 0;
 
 float dn[N] = {0};
 
 float R = 160;
 float R_p = R * 100.0 / 255.0;
-float buff2=0;
+float buff2 = 0;
+int bufa;
 float curr_time = 0;
 
 PID pid;
@@ -81,6 +82,7 @@ void setup() {
 
   ref = ref_low;
 
+
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(ledPin, OUTPUT);
@@ -91,26 +93,41 @@ void setup() {
 
 void loop() {
 
-  // Enables or disables the feedforward term
+  // Detects changes in reference
   if (Serial.available() > 0) {
-    aux = Serial.parseInt();
-    if (aux == 0)
+    char aux = Serial.read();
+
+    if (aux == 's' || aux == 'u')
     {
-      ref = ref_low;
+      int target = Serial.parseInt();
+      if (target == 0) {
+        if (aux == 's')
+          ref = ref_high;
+        else
+          ref = ref_low;
+      }
+      Wire.beginTransmission(0);
+      Wire.write(aux);
+      Wire.write(target);
+      Wire.endTransmission();
+
       ref_change = 1;
     }
-    else if (aux == 1)
-    {
-      ref = ref_high;
-      ref_change = 1;
+    else if(aux == 'r'){
+      calib=1;
+      Wire.beginTransmission(0);
+      Wire.write(aux);
+      Wire.endTransmission();
+      
     }
-    Wire.beginTransmission(0);
-    Wire.write('r');
-    Wire.endTransmission();
   }
-  
-  if (calib==1)
+
+  if (calib == 1)
   {
+    Serial.println("CAAAAALIIIBRAÇAAAAAO CARAAALHO");
+    led_active == 0;
+    n_done = 0;
+    analogWrite(ledPin, 0);
     for (int i = 0; i < N; i++) {
       // le valor LDR
       if (addr == i) {
@@ -138,6 +155,7 @@ void loop() {
         analogWrite(9, 0);
       }
       else {
+        delay(1000);
         while (led_active == 0);
         Serial.println("got permission");
         buff2 = LUX_value();
@@ -155,8 +173,9 @@ void loop() {
     delay(1000);
     on = LUX_value();
     Serial.println(on);
-    calib=0;
-    ref_change=1;
+    calib = 0;
+    ref = ref_low;
+    ref_change = 1;
   }
 
   node = addr;
@@ -174,6 +193,8 @@ void loop() {
   LUX = LUX_value();
 
   Ln = ref;
+
+
 
   // defines the control value we should input
   light = pid.control_signal();
@@ -219,8 +240,20 @@ void receiveEvent(int howMany) {
       d_rec += buff;
       n_drec++;
     }
-    else if (red == 'r') {
+    else if (red == 's') {
+      bufa = Wire.read();
+      if (addr == bufa)
+        ref = ref_high;
       ref_change = 1;
+    }
+    else if (red == 'u') {
+      bufa = Wire.read();
+      if (addr == bufa)
+        ref = ref_low;
+      ref_change = 1;
+    }
+    else if(red == 'r'){
+      calib = 1;
     }
   }
 }

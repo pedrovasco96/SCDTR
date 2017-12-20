@@ -15,6 +15,8 @@
      	tcp::socket sock_;
      	std::string msg_;
       std::string sub_msg_;
+      char sub2;
+      int table;
       std::ostringstream os;
       serial_port sp;
       size_t str_pos;
@@ -33,12 +35,20 @@
         std::getline(is, msg_);
 
         if(!msg_.empty()){
+          os.str("");
           std::cout << "Request: " << msg_ << std::endl;
           if(msg_[0] == 's'){
             str_pos = msg_.find_last_of(" ");
             sub_msg_ = msg_.substr(2, str_pos-2);
+            table = stoi(sub_msg_);
             std::cout << "arduino: " << sub_msg_ << std::endl;
-            os << sub_msg_;
+            sub2 = msg_[str_pos+1];
+            if(sub2 == '0')
+              os << 'u' << sub_msg_;
+            else
+              os << 's' << sub_msg_;
+
+             std::cout << os << std::endl;
             
             async_write(sp, buffer(os.str()), boost::bind(&conn::ack_handler, shared_from_this()));
 
@@ -92,29 +102,29 @@
      }
   };
 
-  class sniff_class{
+ /* class sniff_class{
     private:
 
     public:
-      sniff_class(io_service &io): {
+       {
 
       }
 
     private:
 
-  }
+  }; */
 
-  int main()  {
+  int main() {
       io_service io;
       io_service sniffer;
 
       tcp_server server(io);
       io.run();
 
-      std::threah thr_sniff {[&sniffer](){
+     /* std::thread thr_sniff {[&sniffer](){
         sniff_class serial(sniffer);
         sniffer.run();
-      }
+      } */
 
   }
 
