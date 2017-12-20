@@ -26,15 +26,20 @@ PID::~PID() {
 
 float PID::control_signal()
 {
-  
+
   // defines error
   e = ref - LUX;
-  Serial.println(ref);
   if (ref_change == 1) {
-    Serial.println("consensus");
-    uff = consensus_function();
-    uff = uff / 100 * 255;
-    //uff = k0*ref;
+    if (cons == 1) {
+      Serial.println("consensus");
+      uff = consensus_function();
+      uff = uff / 100 * 255;
+    }
+    else {
+      Serial.println("feedfoward");
+      uff = k0 * ref;
+    }
+
     ref_change = 0;
   }
   else {
@@ -302,10 +307,10 @@ float consensus_function()
     //Serial.println(iter);
   }
   /*ref = 0;
-  for (int i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
     ref += Kn[i] * d_best[i];
-  }
-  ref += on; */
+    }
+    ref += on; */
   return d_best[node];
 
 }

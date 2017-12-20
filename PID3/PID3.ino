@@ -14,6 +14,7 @@ float ref;
 float prev_ref = 0;
 int ref_change = 1;
 int calib = 1;
+int cons = 1;
 float PWM;
 int flag = 1;
 int aux;
@@ -99,6 +100,9 @@ void loop() {
 
     if (aux == 's' || aux == 'u')
     {
+      while (Serial.available() <= 0) {
+        delay(1);
+      }
       int target = Serial.parseInt();
       if (target == 0) {
         if (aux == 's')
@@ -113,18 +117,27 @@ void loop() {
 
       ref_change = 1;
     }
-    else if(aux == 'r'){
-      calib=1;
+    else if (aux == 'r') {
+      calib = 1;
       Wire.beginTransmission(0);
       Wire.write(aux);
       Wire.endTransmission();
-      
+
+    }
+    else if (aux == 'f') {
+      if (cons == 0)
+        cons = 1;
+      else
+        cons = 0;
+
+      Wire.beginTransmission(0);
+      Wire.write(aux);
+      Wire.endTransmission();
     }
   }
 
   if (calib == 1)
   {
-    Serial.println("CAAAAALIIIBRAÇAAAAAO CARAAALHO");
     led_active == 0;
     n_done = 0;
     analogWrite(ledPin, 0);
@@ -140,7 +153,7 @@ void loop() {
         Kn[i] = buff2 / R_p;
 
         Wire.beginTransmission(0);
-        Wire.write('a');
+        Wire.write('e');
         Wire.endTransmission();
         Serial.println("Permission granted");
 
@@ -217,9 +230,35 @@ void loop() {
   Serial.print(millis());
   Serial.println();
 
+
+
   end_time = millis();
   time_ = end_time - start_time;
-  delay(25 - time_);
+
+  for (int i = 0; i < N; i++) {
+    if (addr == i) {
+      Wire.beginTransmission(0);
+      Wire.write('a');
+      Wire.endTransmission();
+      Wire.beginTransmission(0);
+      Wire.write(addr);
+      Wire.endTransmission();
+      Wire.beginTransmission(0);
+      Wire.write('d');
+      Wire.endTransmission();
+      Wire.beginTransmission(0);
+      Wire.write(int(PWM));
+      Wire.endTransmission();
+      Wire.beginTransmission(0);
+      Wire.write('l');
+      Wire.endTransmission();
+      Wire.beginTransmission(0);
+      Wire.write(int(LUX));
+      Wire.endTransmission();
+    }
+  }
+
+  delay(30 - time_);
 
 }
 
@@ -231,7 +270,7 @@ void receiveEvent(int howMany) {
       //  Serial.print("one finished ");
       // Serial.println(n_done);
     }
-    else if (red == 'a') {
+    else if (red == 'e') {
       led_active = 1;
       Serial.println("other led is active");
     }
@@ -252,8 +291,14 @@ void receiveEvent(int howMany) {
         ref = ref_low;
       ref_change = 1;
     }
-    else if(red == 'r'){
+    else if (red == 'r') {
       calib = 1;
+    }
+    else if (red == 'f') {
+      if (cons == 0)
+        cons = 1;
+      else
+        cons = 0;
     }
   }
 }
