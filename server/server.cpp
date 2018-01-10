@@ -59,6 +59,12 @@
             async_write(sp, buffer(os.str()), boost::bind(&conn::ack_handler, shared_from_this()));
 
           }
+          else if(msg_[0] == 'f'){
+            os << msg_[0];
+            
+            async_write(sp, buffer(os.str()), boost::bind(&conn::ack_handler, shared_from_this()));
+
+          }
 
 
         }

@@ -138,7 +138,7 @@ void loop() {
 
   if (calib == 1)
   {
-    led_active == 0;
+    led_active = 0;
     n_done = 0;
     analogWrite(ledPin, 0);
     for (int i = 0; i < N; i++) {
